@@ -9,7 +9,8 @@ In the `main()` method set url strategy to path.
 void main() {
   usePathUrlStrategy();
   runApp(MyApp());
-}```
+}
+```
   
 
 In your root widget put `oauth2.LoginCallback(settings);` in `onGenerateRoute`
