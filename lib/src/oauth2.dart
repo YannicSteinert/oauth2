@@ -25,6 +25,12 @@ class OAuth2 {
       this.baseURL = '',
       });
 
+  Map<String, String> get authHeaders {
+    loadFromStorage();
+    return <String, String>{
+      'Authorization': 'Bearer $token',
+    };
+  }
 
   String _generateLoginUrl() {
     return '$baseURL$authorizationEndpoint';
@@ -197,13 +203,13 @@ class OAuth2 {
   }
 
 
-  void LoadFromStorage() {
+  void loadFromStorage() {
     token = Token.fromSession();
     if(token!.hasRefresh() && token!.isValid()) return;
     token = Token.fromStorage();
   }
 
-  void SilentLogin() {
+  void silentLogin() {
     token = Token.fromSession();
     if (token!.isValid()) return;
     if (token!.hasRefresh()) {
@@ -219,15 +225,15 @@ class OAuth2 {
     }
   }
 
-  bool IsAuthed() {
-    LoadFromStorage();
+  bool get isAuthed {
+    loadFromStorage();
     if (token!.isValid()) {
       return true;
     }
     return false;
   }
 
-  bool _handleTokenRefreshCode(int status, Map<String, dynamic> responseBody) {
+  void _handleTokenRefreshCode(int status, Map<String, dynamic> responseBody) {
     switch (status) {
       case 200: // OK
         if (!responseBody.containsKey('access_token') ||
@@ -235,14 +241,14 @@ class OAuth2 {
           /// token or expiration date missing
           throw ErrorDescription(
               'missing params - "token" and/or "expires" missing');
-          return false;
+          break;
         }
 
         /// parse and store tokens
         token = Token.fromJson(responseBody);
         token!.StoreInSession();
         token!.StoreInStorage();
-        return true;
+        break;
 
     /// @todo: Error Handling
       case 400: // Bad Request
@@ -257,9 +263,8 @@ class OAuth2 {
           throw ErrorDescription(
               '${responseBody['error']} - ${responseBody['error_description']}');
         }
-        return false;
+        break;
     }
-    return false;
   }
 
   Map<String, String> _generateRefreshRequestBody() {
@@ -271,7 +276,7 @@ class OAuth2 {
     };
   }
 
-  Future<bool> RefreshToken() async {
+  void RefreshToken() async {
     var body = _generateRefreshRequestBody();
     Uri uri = Uri.parse(_generateTokenUrl());
     http.Response response = await http.post(uri,
@@ -282,6 +287,6 @@ class OAuth2 {
         });
 
     Map<String, dynamic> resBody = jsonDecode(response.body);
-    return _handleTokenRefreshCode(response.statusCode, resBody);
+    _handleTokenRefreshCode(response.statusCode, resBody);
   }
 }
