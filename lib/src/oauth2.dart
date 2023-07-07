@@ -5,31 +5,33 @@ import 'dart:math';
 import 'dart:html' as html;
 import 'dart:convert';
 
-import 'package:oauth2/data/models/token.dart';
-import 'package:oauth2/main.dart';
+import './token.dart';
 
 class OAuth2 {
   Token? token;
-
-  String clientID, clientSecret, redirectURL;
-  String authorization, tokenEndpoint;
+  final GlobalKey<NavigatorState> navigatorKey;
+  String clientID, clientSecret, redirectURL, baseURL;
+  String authorizationEndpoint, tokenEndpoint;
   String codeVerifier = '', scope = '', state = '';
 
   OAuth2(
-      {required this.authorization,
+      {required this.authorizationEndpoint,
       required this.tokenEndpoint,
       required this.clientID,
       required this.clientSecret,
       required this.redirectURL,
-      this.scope = ''});
+      required this.navigatorKey,
+      this.scope = '',
+      this.baseURL = '',
+      });
 
 
   String _generateLoginUrl() {
-    return authorization;
+    return '$baseURL$authorizationEndpoint';
   }
 
   String _generateTokenUrl() {
-    return tokenEndpoint;
+    return '$baseURL$tokenEndpoint';
   }
 
   String _generateCodeVerifier({int length = 64}) {
