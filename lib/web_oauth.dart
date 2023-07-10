@@ -1,4 +1,4 @@
-library web_oauth;
+library oauth2;
 
-import './src/token.dart';
-import './src/oauth2.dart';
+export './src/token.dart';
+export './src/oauth2.dart';
